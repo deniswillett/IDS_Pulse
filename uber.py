@@ -5,12 +5,25 @@ import datetime
 import time
 import csv
 import os
+import numpy
+from psycopg2.extensions import register_adapter, AsIs
 
-def getData(uber_token):
+def addapt_numpy_int64(numpy_int64):
+  return AsIs(numpy_int64)
+register_adapter(numpy.int64, addapt_numpy_int64)
+
+from sqlalchemy import create_engine
+from sqlalchemy_utils import database_exists, create_database
+import psycopg2
+
+
+def getData(uber_token, hoods, username, pswd):
 	session = Session(server_token = uber_token)
 	client = UberRidesClient(session)
 
-	outLines = []
+	
+	con = psycopg2.connect("dbname='Pulse' user='%s' host='localhost' password='%s'" % (username, pswd))
+	cur = con.cursor()
 
 	for row in range(len(nhoods.index)):
 		lat = nhoods.iloc[row]['lat']
@@ -40,31 +53,36 @@ def getData(uber_token):
 		ts = time.time()
 		timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
-		outStr = [geoID, timeStamp, outperc, low, high, etaSeconds]
-
-		outLines.append(outStr);
-
-
-	with open(outFile, 'a') as f:
-	    writer = csv.writer(f)
-	    writer.writerows(outLines)
+		query =  "INSERT INTO uber_sf (geoid, time, outperc, low, high, etaseconds) VALUES (%s, %s, %s, %s,%s,%s);"
+		data = (geoID, timeStamp, outperc, low, high, etaSeconds)
+		cur.execute(query, data)
+	con.commit()
+	print('Wrote data')
+	con.close()
 
 
-outFile = "output/ubersfcost1.csv"
+
 
 nhoods = pd.read_csv('input/SF_CensusTracts.csv')
 
 uber_token = os.environ['UBER_TOKEN']
-print('Have token... gonna ride!', uber_token)
+username = os.environ['DB_USERNAME']
+pswd = os.environ['DB_PSWD']
 
-# while True:
-# 	getData(uber_token)
+while True:
+	try:
+		getData(uber_token, nhoods, username, pswd)
 
-# 	ts = time.time()
-# 	timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-# 	print("Got data at: " + timeStamp)
+		ts = time.time()
+		timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+		print("Got data at: " + timeStamp)
 
-# 	time.sleep(600)
+	except:
+		ts = time.time()
+		timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+		print("Error: " + timeStamp)
+
+	time.sleep(500)
 
 
 
