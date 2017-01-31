@@ -6,13 +6,7 @@ import time
 import csv
 import os
 
-outFile = "output/ubersfcost1.csv"
-
-nhoods = pd.read_csv('input/SF_CensusTracts.csv')
-
-uber_token = os.environment('UBER_TOKEN')
-
-def getData():
+def getData(uber_token):
 	session = Session(server_token = uber_token)
 	client = UberRidesClient(session)
 
@@ -56,17 +50,21 @@ def getData():
 	    writer.writerows(outLines)
 
 
+outFile = "output/ubersfcost1.csv"
 
+nhoods = pd.read_csv('input/SF_CensusTracts.csv')
 
+uber_token = os.environ['UBER_TOKEN']
+print('Have token... gonna ride!', uber_token)
 
-while True:
-	getData()
+# while True:
+# 	getData(uber_token)
 
-	ts = time.time()
-	timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-	print("Got data at: " + timeStamp)
+# 	ts = time.time()
+# 	timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+# 	print("Got data at: " + timeStamp)
 
-	time.sleep(600)
+# 	time.sleep(600)
 
 
 
