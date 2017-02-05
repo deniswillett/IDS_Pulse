@@ -1,17 +1,19 @@
 
 
 library(shiny)
+library(plotly)
 
-shinyUI(navbarPage('Pulse!',
+shinyUI(navbarPage('Pulse',
                    
-                   tabPanel("Hotspots!",
+                   tabPanel("Hotspots",
+                            titlePanel('San Francisco on Feb 4th'),
                             sidebarLayout(
                                     
                                     sidebarPanel(
-                                            checkboxGroupInput("day", "Day of Week:",
-                                                               c('Wed 25th' = 25,
-                                                                 'Thurs 26th' = 26),
-                                                               selected = c(25, 26))
+                                            checkboxGroupInput("service", "Service:",
+                                                               c('Uber' = 'Uber',
+                                                                 'Lyft' = 'Lyft'),
+                                                               selected = c('Uber', 'Lyft'))
                                     ),
                                     
                                     mainPanel(
@@ -20,25 +22,25 @@ shinyUI(navbarPage('Pulse!',
                             )
                             
                             ),
-                   tabPanel("Visualization",
+                   tabPanel("Map",
+                            titlePanel('San Francisco on Feb 4th'),
                             sidebarLayout(
                                     sidebarPanel(
-                                            radioButtons("daymap", "Day of Week:",
-                                                               c('Wed 25th' = 25,
-                                                                 'Thurs 26th' = 26),
-                                                               selected = 25),
+                                            radioButtons("mapserv", "Service:",
+                                                         c('Uber' = 'Uber',
+                                                           'Lyft' = 'Lyft'),
+                                                         selected = 'Uber'),
                                             sliderInput('time', 'Time of Day',
-                                                        min = 0, max = 24, 
+                                                        min = 0, max = 24,
                                                         value = 7, step = 1)
                                     ),
                                     
                                     mainPanel(
-                                            plotOutput('map')
+                                            plotlyOutput('map')
                                     )
                                     
                             )
-                            ),
-                   tabPanel('Time Series')
+                            )
                    
 ))
         
